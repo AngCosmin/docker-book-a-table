@@ -62,22 +62,25 @@ namespace Worker
                         var command = pgsql.CreateCommand();
                         command.CommandText = "SELECT * FROM restaurants";
 
-                        using (NpgsqlDataReader reader = command.ExecuteReader()) {
-                            List<Restaurant> restaurants = new List<Restaurant>();
-                            while (reader.Read())
-                            {
-                                Console.WriteLine(reader.GetValue(0).ToString());
+                        try {
+                            using (NpgsqlDataReader reader = command.ExecuteReader()) {
+                                List<Restaurant> restaurants = new List<Restaurant>();
+                                while (reader.Read())
+                                {
+                                    Restaurant restaurant = new Restaurant();
+                                    restaurant.Id = (int)reader.GetValue(0);
+                                    restaurant.Name = reader.GetValue(1).ToString();
+                                    restaurant.Email = reader.GetValue(2).ToString();
+                                    restaurant.Logo = reader.GetValue(6).ToString();
 
-                                Restaurant restaurant = new Restaurant();
-                                restaurant.Id = (int)reader.GetValue(0);
-                                restaurant.Name = reader.GetValue(1).ToString();
-                                restaurant.Email = reader.GetValue(2).ToString();
-                                restaurant.Logo = reader.GetValue(6).ToString();
+                                    restaurants.Add(restaurant);
+                                }
 
-                                restaurants.Add(restaurant);
+                                redis.StringSet("restaurants", JsonConvert.SerializeObject(restaurants));
                             }
-
-                            redis.StringSet("restaurants", JsonConvert.SerializeObject(restaurants));
+                        }
+                        catch(Exception) {
+                            Console.WriteLine("Exception");
                         }
                     }
                     else
