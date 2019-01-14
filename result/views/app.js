@@ -1,50 +1,33 @@
 var app = angular.module('catsvsdogs', []);
-var socket = io.connect({transports:['polling']});
+var socket = io.connect({ transports: ['polling'] });
 
-var bg1 = document.getElementById('background-stats-1');
-var bg2 = document.getElementById('background-stats-2');
+app.controller('statsCtrl', function ($scope) {
+	$scope.restaurants = [];
+	$scope.restaurantReservations = [];
 
-app.controller('statsCtrl', function($scope){
-  $scope.aPercent = 50;
-  $scope.bPercent = 50;
+	socket.on('restaurants', function (json) {
+		$scope.restaurants = json;
+	})
 
-  var updateScores = function(){
-    socket.on('scores', function (json) {
-       data = JSON.parse(json);
-       var a = parseInt(data.a || 0);
-       var b = parseInt(data.b || 0);
+	socket.on('scores', function (json) {
+		console.log(json)
 
-       var percentages = getPercentages(a, b);
+		$scope.$apply(function () {
+			$scope.restaurantReservations = json;
+		});
 
-       bg1.style.width = percentages.a + "%";
-       bg2.style.width = percentages.b + "%";
+		$scope.reservationsSelected = []
+		for (let r of $scope.restaurantReservations) {
+			if  (r.restaurant_id === $scope.selected_restaurant_id) {
+				$scope.$apply(function () {
+					$scope.reservationsSelected.push(r)
+				});
+			}
+		}
+	});
 
-       $scope.$apply(function () {
-         $scope.aPercent = percentages.a;
-         $scope.bPercent = percentages.b;
-         $scope.total = a + b;
-       });
-    });
-  };
-
-  var init = function(){
-    document.body.style.opacity=1;
-    updateScores();
-  };
-  socket.on('message',function(data){
-    init();
-  });
+	$scope.select = function(restaurant_id) {
+		$scope.reservationsSelected = []
+		$scope.selected_restaurant_id = restaurant_id
+    };
 });
-
-function getPercentages(a, b) {
-  var result = {};
-
-  if (a + b > 0) {
-    result.a = Math.round(a / (a + b) * 100);
-    result.b = 100 - result.a;
-  } else {
-    result.a = result.b = 50;
-  }
-
-  return result;
-}
