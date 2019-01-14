@@ -59,10 +59,10 @@ namespace Worker
                     if (json != null) {
                         Console.WriteLine("Get restaurants");
 
-                        var command = pgsql.CreateCommand();
-                        command.CommandText = "SELECT * FROM restaurants";
-
                         try {
+                            var command = pgsql.CreateCommand();
+                            command.CommandText = "SELECT * FROM restaurants";
+
                             using (NpgsqlDataReader reader = command.ExecuteReader()) {
                                 List<Restaurant> restaurants = new List<Restaurant>();
                                 while (reader.Read())
