@@ -29,12 +29,19 @@ def hello():
 @app.route('/get/restaurants', methods=['POST'])
 def get_restaurants():
     redis = get_redis()
-    restaurants = json.loads(redis.get('restaurants'))
-
+    if redis.get('restaurants'):
+        return jsonify({
+            'success': True,
+            'restaurants': json.loads(redis.get('restaurants')),
+        })
+    else:
+        print('There is nothing in redis for restaurants')
+    
     return jsonify({
         'success': True,
-        'restaurants': restaurants,
+        'restaurants': []
     })
+    
 
 @app.route('/reserve', methods=['POST'])
 def reserve():

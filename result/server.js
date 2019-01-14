@@ -52,7 +52,7 @@ async.retry(
 );
 
 function getVotes(client) {
-	client.query('SELECT * FROM reserve', [], function (err, result) {
+	client.query('SELECT * FROM reserve;', [], function (err, result) {
 		if (err) {
 			console.error("Error performing query: " + err);
 		} else {
